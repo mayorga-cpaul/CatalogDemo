@@ -17,7 +17,7 @@ namespace CatalogDemo.Extensions
                 Name = productDto.Name,
                 Description = productDto.Description, 
                 Quantity = productDto.Quantity,
-                Price = productDto.price,
+                Price = productDto.Price,
                 CreatedDate = DateTimeOffset.UtcNow,
             };
         }

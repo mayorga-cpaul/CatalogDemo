@@ -39,7 +39,6 @@ public class ProductRepository : IRepository
 
     public void Update(Guid id, Product product)
     {
-        GetById(id);
         product.Id = id;
         context.Products.Update(product);
         context.SaveChanges();

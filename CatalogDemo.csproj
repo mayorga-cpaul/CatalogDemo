@@ -26,5 +26,6 @@
     <Using Include="CatalogDemo.Models" />
     <Using Include="CatalogDemo.Common" />
     <Using Include="CatalogDemo.Interface" />
+    <Using Include="CatalogDemo.Extensions" />
   </ItemGroup>
 </Project>

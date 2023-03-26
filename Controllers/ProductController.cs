@@ -1,70 +1,93 @@
-using CatalogDemo.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using static CatalogDemo.Common.Dtos;
 
-namespace CatalogDemo.Controllers;
-
-// localhost:5850/Product/GetProduct
-[ApiController]
-[Route("[Controller]")]
-public class ProductController
+namespace CatalogDemo.Controllers
 {
-    private readonly IRepository repository;
-    public ProductController(IRepository repository)
+    // Que no se les olvide que un Controlador hereda de ControllerBase
+    [ApiController]
+    [Route("[controller]")]
+    public class ProductController : ControllerBase
     {
-        this.repository = repository;
-    }
-
-    [HttpGet]
-    public IEnumerable<ProductDto> GetProducts()
-    {
-        return repository.GetProducts().Select(e => e.AsDto());
-    }
-
-    [HttpGet("{id}")]
-    public ActionResult<ProductDto> GetById(Guid id)
-    {
-        try
+        // Inyección de dependencias
+        private readonly IRepository repository;
+        public ProductController(IRepository repository)
         {
-            var product = repository.GetById(id);
-            return product.AsDto();
+            this.repository = repository;
         }
-        catch (Exception ex)
+
+        [HttpGet]
+        public IEnumerable<ProductDto> GetProducts()
         {
-            throw ex;
+            return repository.GetProducts().Select(e => e.AsDto());
         }
-    }
 
-    [HttpPost]
-    public void Create(CreateProductDto productDto)
-    {
-        try
+        // Get/Products/{id}
+        [HttpGet("{id}")]
+        public ActionResult<ProductDto> GetProducById(Guid id)
         {
-            repository.Create(productDto.AsPoco());
+            try
+            {
+                var product = repository.GetById(id);
+
+                // Dtos Mantener seguro nuestro model
+                return product.AsDto();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"ERROR: {ex.Message}");
+            }
         }
-        catch (System.Exception ex)
+
+        // Delete/Products/{id}
+        [HttpDelete("{id}")]
+        public ActionResult RemoveProduct(Guid id)
         {
-            throw ex;
+            try
+            {
+                repository.Delete(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"ERROR: {ex.Message}");
+            }
         }
-    }
 
-    [HttpPut]
-    public void Update(Guid id, CreateProductDto update)
-    {
-        Product product = new()
+        // Post/Products/{id}
+        [HttpPost]
+        public ActionResult CreateProduct(CreateProductDto createProductDto)
         {
-            Name = update.Name,
-            Description = update.Description,
-            Quantity = update.Quantity,
-            Price = update.price
-        };
+            try
+            {
+                var product = createProductDto.AsPoco();
+                repository.Create(product);
 
-        repository.Update(id, product);
-    }
+                //Cuando se crea un producto se mostrará en Swagger
+                return CreatedAtAction(nameof(GetProducById), new { id = product.Id }, product.AsDto());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"ERROR: {ex.Message}");
+            }
 
-    [HttpDelete]
-    public void Delete(Guid id)
-    {
-        repository.Delete(id);
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult UpdateProduct(Guid id, UpdateProductDto updateProductDto)
+        {
+            try
+            {
+                var product = repository.GetById(id);
+                product.Name = updateProductDto.Name;
+                product.Price = updateProductDto.Price;
+                repository.Update(id, product);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"ERROR: {ex.Message}");
+            }
+        }
     }
 }
