@@ -21,7 +21,7 @@ appsettings.json
 dotnet user-secrets set SqlDbSettings:Password tucontraseña
 ```
 
-### Configurar base de datos
+### Configurar base de datos (HACER ESTO SI NO HAS CONFIGURADO TU CADENA DE CONEXIÓN DESDE EL APPSETTINGS.JSON)
 
 Como ya existe una migración solo tienen que poner esto en su CataloDemoDbContext 
 
